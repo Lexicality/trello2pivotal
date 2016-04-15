@@ -8,3 +8,4 @@ env:
 extends: "../smarkets/.eslintrc"
 rules:
     no-console: off
+    generator-star-spacing: off
