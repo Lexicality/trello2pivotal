@@ -42,9 +42,6 @@ function storyify(card) {
         case 'Icebox':
             story.current_state = 'unscheduled';
             break;
-        case 'Code Quality':
-            story.story_type = 'chore';
-            break;
         case 'Bug':
             story.story_type = 'bug';
             break;
