@@ -37,6 +37,23 @@ function storyify(card) {
             story.labels.push({ name: label.name });
         }
     }
+    for (let action of card.actions) {
+        if (action.type === 'createCard') {
+            story.created_at = action.date;
+            if (memberMap.has(action.idMemberCreator)) {
+                story.requested_by_id = memberMap.get(action.idMemberCreator);
+            }
+        }
+    }
+    // if (card.due) {
+        // story.deadline = card.due;
+    // }
+    story.owner_ids = card.idMembers.map((id) => memberMap.get(id)).filter(_.identity).slice(0, 3);
+
+    console.log('Result:');
+    console.dir(story);
+    console.log();
+
     return story;
 }
 
@@ -77,15 +94,24 @@ async function fn2() {
         }
     }
 
-    let cards = trelloGet(`${boardURL}/cards/visible/`)
+    let cards = trelloGet(`${boardURL}/cards/visible/`, {
+        attachments: true,
+        actions: [
+            'commentCard',
+            'createCard',
+        ].join(','),
+    })
         .then((ret) => ret.filter((card) => _.includes(config.trello.lists, card.idList)));
 
     for (let card of await cards) {
-        // console.info(card);
+        console.info(card);
+        // console.dir(card.actions[0]);
+        // break;
+        console.log();
         console.info('Transfering across card "%s"!', card.name);
         let story = await pivotalAPI.post(`${projectURL}/stories`, storyify(card));
         console.info('Created story %s!', story.id);
-        // break;
+        break;
     }
 }
 
