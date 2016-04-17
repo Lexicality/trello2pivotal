@@ -6,23 +6,10 @@ import _ from 'lodash';
 import Trello from 'node-trello';
 import { PivotalClient as Pivotal } from './pivotal';
 
-
 const config = toml.parse(fs.readFileSync('config.toml'));
 
 Q.longStackSupport = true;
 
-/*
-[ 'Needs to be done',
-  'Code Quality',
-  'Responsiveness',
-  'Nice to do',
-  'Good idea to do',
-  'Urgent to be done',
-  'Visuals',
-  'Bug',
-  'Usability issue',
-  'Icebox' ]
-*/
 
 function storyify(card) {
     let story = {
@@ -52,15 +39,6 @@ function storyify(card) {
     return story;
 }
 
-// function determineTrelloLabels(labels) {
-    // console.log(_.map(labels, 'name'));
-    // return {
-        // decorative: {},
-        // prios: {},
-    // };
-// }
-
-
 
 async function fn2() {
     let trelloAPI = new Trello(config.trello.key, config.trello.token);
@@ -75,8 +53,6 @@ async function fn2() {
 
     const boardURL = `/1/boards/${config.trello.board}`;
 
-    // await trelloGet(boardURL + '/labels').then(determineTrelloLabels);
-
     let cards = trelloGet(`${boardURL}/cards/visible/`)
         .then((ret) => ret.filter((card) => _.includes(config.trello.lists, card.idList)));
 
@@ -87,8 +63,6 @@ async function fn2() {
         console.info('Created story %s!', story.id);
         // break;
     }
-
-    // console.info('Got #%d cards from trello!', cards.length);
 }
 
 (async function() {
