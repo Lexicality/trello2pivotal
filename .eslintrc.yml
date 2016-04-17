@@ -5,7 +5,8 @@ parserOptions:
 env:
     node: true
     es6: true
-extends: "../smarkets/.eslintrc"
+extends: "../smarkets/.eslintrc.yml"
 rules:
     no-console: off
     generator-star-spacing: off
+    no-unreachable: off
