@@ -111,6 +111,19 @@ async function fn2() {
         console.info('Transfering across card "%s"!', card.name);
         let story = await pivotalAPI.post(`${projectURL}/stories`, storyify(card));
         console.info('Created story %s!', story.id);
+        const storyURL = `${projectURL}/stories/${story.id}`;
+
+        // Comments
+        for (let comment of _.filter(card.actions, { type: 'commentCard' })) {
+            // console.dir(comment);
+            const { idMemberCreator: tMember, data: { text } } = comment;
+            let pComment = await pivotalAPI.post(`${storyURL}/comments`, {
+                text,
+                person_id: memberMap.get(tMember),
+            });
+            console.info("Created comment %s!", pComment.id);
+        }
+
         break;
     }
 }
