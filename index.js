@@ -105,12 +105,6 @@ async function fn2() {
         .then((ret) => ret.filter((card) => _.includes(config.trello.lists, card.idList)));
 
     for (let card of await cards) {
-        console.info(card);
-
-
-        // break;
-
-        console.log();
         console.info('Transfering across card "%s"!', card.name);
         let story = await pivotalAPI.post(`${projectURL}/stories`, storyify(card));
         console.info('Created story %s!', story.id);
@@ -174,8 +168,6 @@ async function fn2() {
                 complete: state !== 'incomplete',
             });
         }
-
-        break;
     }
 }
 
