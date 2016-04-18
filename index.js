@@ -106,8 +106,10 @@ async function fn2() {
 
     for (let card of await cards) {
         console.info(card);
-        // console.dir(card.actions[0]);
+
+
         // break;
+
         console.log();
         console.info('Transfering across card "%s"!', card.name);
         let story = await pivotalAPI.post(`${projectURL}/stories`, storyify(card));
@@ -157,6 +159,20 @@ async function fn2() {
                 person_id: memberMap.get(tMember),
             });
             console.info("Created comment %s!", pComment.id);
+        }
+
+        // Checkenlisten
+        const checklists = await trelloGet(`/1/cards/${card.id}/checklists`);
+        let checkItems = [];
+        for (const list of checklists) {
+            checkItems = checkItems.concat(list.checkItems);
+        }
+        for (const { state, name } of checkItems) {
+            console.info("Adding %s task %s", state, name);
+            await pivotalAPI.post(`${storyURL}/tasks`, {
+                description: name,
+                complete: state !== 'incomplete',
+            });
         }
 
         break;
