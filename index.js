@@ -2,6 +2,7 @@ import Q from 'q';
 import * as fs from 'fs';
 import * as toml from 'toml';
 import _ from 'lodash';
+import request from 'request';
 
 import Trello from 'node-trello';
 import { PivotalClient as Pivotal } from './pivotal';
@@ -112,6 +113,40 @@ async function fn2() {
         let story = await pivotalAPI.post(`${projectURL}/stories`, storyify(card));
         console.info('Created story %s!', story.id);
         const storyURL = `${projectURL}/stories/${story.id}`;
+
+        // Attachenments
+        if (card.attachments) {
+            let file_attachments = _.filter(card.attachments, { isUpload: true })
+                .map(async ({ name, url, mimeType, bytes }) => {
+                    console.info('Downloading %s from %s', name, url);
+                    return await pivotalAPI.post(
+                        `${projectURL}/uploads`,
+                        undefined,
+                        undefined,
+                        {
+                            formData: {
+                                file: {
+                                    value: request(url),
+                                    options: {
+                                        fileName: name,
+                                        contentType: mimeType,
+                                        knownLength: bytes,
+                                    },
+                                },
+                            },
+                        }
+                    );
+                });
+            file_attachments = await Promise.all(file_attachments);
+            console.info('Downloaded %d attachments', file_attachments.length);
+            let attachmentLinks = _.filter(card.attachments, { isUpload: false }).map((a) => a.url);
+            console.info('Found %d url attachments', attachmentLinks.length);
+            let pComment = await pivotalAPI.post(`${storyURL}/comments`, {
+                text: '*Attachments*:\n' + attachmentLinks.join('\n'),
+                file_attachments,
+            });
+            console.info('Created attachment comment %s', pComment.id);
+        }
 
         // Comments
         for (let comment of _.filter(card.actions, { type: 'commentCard' })) {
